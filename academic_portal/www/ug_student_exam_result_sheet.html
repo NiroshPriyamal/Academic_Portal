@@ -1,0 +1,143 @@
+{% extends "templates/web.html" %}
+
+{% block title %}UG Student Exam Result Sheet{% endblock %}
+
+{% block head_include %}
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/assets/academic_portal/css/ug_student_exam_result_sheet.css" />
+<style>
+  /* Force Frappe's inner containers to go full-width */
+  .page-content-wrapper > .container,
+  .page-content-wrapper > .container-fluid,
+  main > .container,
+  main > .container-fluid {
+    max-width: 100% !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="ug-page-wrapper">
+
+  <!-- ═══ Sticky action bar ═══════════════════════ -->
+  <div class="action-buttons" id="action-bar">
+    <button class="save-btn" id="back-button"
+            style="background: linear-gradient(135deg, #3498db, #2980b9);">← Back to Courses</button>
+    <button class="save-btn" style="background:#17a2b8;"
+            onclick="showStatistics()">📊 View Statistics</button>
+    <button class="save-btn" style="background:#6c757d;"
+            onclick="showPrintView()">🖨️ Print</button>
+    <button class="save-btn" style="background:#28a745;"
+            onclick="saveChanges()">💾 Save Changes</button>
+    <button class="save-btn first-submit-btn" style="background:#0069d9; display:none;"
+            onclick="doFirstSubmit()">Submit to Second Examiner</button>
+    <button class="save-btn second-submit-btn" style="background:#6f42c1; display:none;"
+            onclick="doSecondSubmit()">Submit to Exam Board</button>
+    <button class="save-btn unlock1-btn" style="background:#fd7e14; display:none;"
+            onclick="doUnlock1()">🔓 Unlock 1</button>
+    <button class="save-btn unlock2-btn" style="background:#e83e8c; display:none;"
+            onclick="doUnlock2()">🔓 Unlock 2</button>
+  </div>
+
+  <!-- ═══ Page loader / error ══════════════════════ -->
+  <div id="page-loader">
+    <span class="loading-spinner"></span> Loading result sheet…
+  </div>
+  <div id="page-error"></div>
+
+  <!-- ═══ Main content (populated by JS) ═══════════ -->
+  <div id="sheet-content" style="display:none;">
+
+    <!-- Header info block (populated by JS) -->
+    <div class="header-info" id="header-info"></div>
+
+    <!-- Marks table -->
+    <div class="table-wrap">
+      <table id="marks-table">
+        <thead>
+          <tr>
+            <th rowspan="2">#</th>
+            <th rowspan="2">Index Number</th>
+            <th rowspan="2">Exam Day Attend</th>
+            <th rowspan="2">Prev. Assignment</th>
+            <th colspan="3" style="background:#c8f0e2;">First Examiner</th>
+            <th colspan="3" style="background:#e8d5f5;">Second Examiner</th>
+            <th rowspan="2">Final Marks</th>
+            <th rowspan="2">Grade</th>
+            <th rowspan="2">GPV</th>
+            <th rowspan="2">Auto Status</th>
+            <th rowspan="2">Examiner Comment</th>
+          </tr>
+          <tr>
+            <th style="background:#d7f4ec;">Assignment</th>
+            <th style="background:#d7f4ec;">Paper</th>
+            <th style="background:#d7f4ec;">Total</th>
+            <th style="background:#ede0f7;">Assign (+/-)</th>
+            <th style="background:#ede0f7;">Paper (+/-)</th>
+            <th style="background:#ede0f7;">Total (+/-)</th>
+          </tr>
+        </thead>
+        <tbody id="marks-tbody"></tbody>
+      </table>
+    </div>
+
+    <!-- Bottom action buttons (mirrored) -->
+    <div class="action-buttons" style="margin-top:20px; position:static; border:none; padding:0;">
+      <button class="save-btn" style="background:#28a745;"
+              onclick="saveChanges()">💾 Save Changes</button>
+      <button class="save-btn first-submit-btn" style="background:#0069d9; display:none;"
+              onclick="doFirstSubmit()">Submit to Second Examiner</button>
+      <button class="save-btn second-submit-btn" style="background:#6f42c1; display:none;"
+              onclick="doSecondSubmit()">Submit to Exam Board</button>
+      <button class="save-btn unlock1-btn" style="background:#fd7e14; display:none;"
+              onclick="doUnlock1()">🔓 Unlock 1</button>
+      <button class="save-btn unlock2-btn" style="background:#e83e8c; display:none;"
+              onclick="doUnlock2()">🔓 Unlock 2</button>
+    </div>
+
+  </div>
+
+  <!-- ═══ Statistics Modal ══════════════════════════ -->
+  <div id="statsModal" class="stats-modal">
+    <div class="stats-content">
+      <span class="close" onclick="closeStatistics()">&times;</span>
+      <div class="stats-header">
+        <h2>📊 Exam Results Statistics</h2>
+        <button class="print-stats-btn" onclick="printStatistics()">🖨️ Print Statistics</button>
+      </div>
+      <div class="stats-grid">
+        <div class="stats-card chart-card">
+          <h3>📊 Grade Distribution Chart</h3>
+          <div class="chart-container"><canvas id="gradeChart"></canvas></div>
+        </div>
+        <div class="stats-card">
+          <h3>🎯 Grade Distribution</h3>
+          <table class="grade-stats-table">
+            <thead><tr><th>Grade</th><th>Count</th><th>%</th></tr></thead>
+            <tbody id="gradeDistribution"></tbody>
+          </table>
+        </div>
+        <div class="stats-card">
+          <h3>📈 Statistical Measures</h3>
+          <div id="statisticalMeasures"></div>
+        </div>
+        <div class="stats-card">
+          <h3>✅ Pass / Fail Summary</h3>
+          <div id="passFailSummary"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Hidden print area ═════════════════════════ -->
+  <div id="print-area"></div>
+
+</div>
+{% endblock %}
+
+{% block script %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+<script src="/assets/academic_portal/js/ug_student_exam_result_sheet.js"></script>
+{% endblock %}

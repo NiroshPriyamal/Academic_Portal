@@ -1,0 +1,347 @@
+/* ug_student_exam_result_sheet.css */
+/* Matches the layout of the original master_student_exam_result_sheet exactly */
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ── Neutralise Frappe container constraints ─────── */
+body {
+  font-family: 'Inter', sans-serif;
+  background: #f0f4f8 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  color: #333;
+}
+
+.page-content-wrapper,
+.page_content,
+.web-page-block {
+  padding: 0 !important;
+  margin: 0 !important;
+  max-width: 100% !important;
+}
+
+/* ── Full-width page wrapper ─────────────────────── */
+.ug-page-wrapper {
+  width: 100%;
+  min-height: 100vh;
+  background: #f0f4f8;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+/* ── Sticky action bar ───────────────────────────── */
+.action-buttons {
+  position: sticky;
+  top: 0;
+  background: #f0f4f8;
+  z-index: 999;
+  border-bottom: 1px solid #ddd;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 10px 0 12px;
+  margin-bottom: 16px;
+}
+
+.save-btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  color: white;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.25s ease;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.save-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.22);
+}
+
+.save-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* ── Page loader / error ─────────────────────────── */
+#page-loader {
+  text-align: center;
+  padding: 80px 20px;
+  color: #888;
+  font-size: 15px;
+}
+
+#page-error {
+  display: none;
+  text-align: center;
+  padding: 60px 20px;
+  color: #e74c3c;
+  font-size: 15px;
+}
+
+.loading-spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 3px solid #ccc;
+  border-top-color: #3498db;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Header info card ────────────────────────────── */
+.header-info {
+  background: #ffffff;
+  padding: 2rem;
+  border-radius: 16px;
+  margin-bottom: 2rem;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+  border-left: 6px solid #74b49b;
+  position: relative;
+}
+
+.header-info::before {
+  content: '🌿';
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  font-size: 24px;
+}
+
+.header-info h3 {
+  text-align: center;
+  margin: 0 0 0.4rem;
+  font-size: 1.6rem;
+  color: #0056b3;
+}
+
+.header-info > p {
+  text-align: center;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.header-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+  margin-top: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .header-grid { grid-template-columns: 1fr; }
+}
+
+.header-section {
+  padding: 1rem;
+  border-right: 1px solid #eee;
+}
+
+.header-section:last-child { border-right: none; }
+
+.header-section h4 {
+  font-size: 1rem;
+  margin-bottom: 0.6rem;
+  color: #444;
+  border-bottom: 2px solid #f0f0f0;
+  padding-bottom: 0.3rem;
+}
+
+.header-section div {
+  font-size: 0.9rem;
+  color: #555;
+  margin-bottom: 0.35rem;
+}
+
+/* ── Table wrapper ───────────────────────────────── */
+.table-wrap {
+  overflow-x: auto;
+  border-radius: 10px;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
+  background: #fff;
+}
+
+table#marks-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  font-size: 13px;
+  min-width: 900px;
+}
+
+#marks-table thead { background: #d7f4ec; }
+
+#marks-table th,
+#marks-table td {
+  border: 1px solid #e0e0e0;
+  padding: 9px 8px;
+  text-align: center;
+  vertical-align: middle;
+}
+
+#marks-table th { font-weight: 600; }
+
+#marks-table td:first-child,
+#marks-table th:first-child {
+  background: #f8f9fa;
+  color: #444;
+  font-weight: bold;
+}
+
+/* ── Editable cells ──────────────────────────────── */
+td[contenteditable="true"] {
+  background-color: #fffde7;
+  cursor: text;
+  outline: none;
+  transition: background-color 0.2s, border 0.2s;
+}
+
+td[contenteditable="true"]:focus {
+  background-color: #ffffe0;
+  border: 1px solid #ffc107;
+}
+
+/* ── Locked cells ────────────────────────────────── */
+.locked-cell {
+  background-color: #f1f1f1 !important;
+  cursor: not-allowed !important;
+  color: #999;
+}
+
+/* ── Computed columns ────────────────────────────── */
+.final_grade { font-weight: bold; color: #00695c; }
+.auto_status { font-weight: bold; color: #c62828; }
+
+/* ── Attendance dropdown ─────────────────────────── */
+select.exam_day_attend {
+  padding: 4px 6px;
+  border-radius: 6px;
+  border: 1px solid #d0d7de;
+  font-size: 13px;
+  background-color: #fffde7;
+}
+
+select.exam_day_attend:focus {
+  border-color: #007bff;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
+}
+
+/* ── Row hover highlight ─────────────────────────── */
+.highlighted td { background-color: #cce5ff !important; }
+
+/* ── Statistics Modal ────────────────────────────── */
+.stats-modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0; top: 0;
+  width: 100%; height: 100%;
+  overflow: auto;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.stats-content {
+  background: #fefefe;
+  margin: 2% auto;
+  padding: 2rem;
+  border-radius: 16px;
+  width: 90%;
+  max-width: 1200px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.stats-content .close {
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+  color: #aaa;
+  line-height: 1;
+}
+
+.stats-content .close:hover { color: #000; }
+
+.stats-header {
+  text-align: center;
+  margin-bottom: 2rem;
+  border-bottom: 2px solid #e2e8f0;
+  padding-bottom: 1rem;
+}
+
+.stats-header h2 { color: #2d3748; font-size: 1.8rem; }
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.stats-card {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-left: 4px solid #4299e1;
+}
+
+.stats-card h3 { margin: 0 0 1rem; color: #2d3748; font-size: 1.15rem; }
+
+.chart-card { grid-column: 1 / -1; min-height: 380px; }
+.chart-container { position: relative; height: 320px; }
+
+.grade-stats-table { width: 100%; border-collapse: collapse; margin-top: 0.5rem; }
+.grade-stats-table th,
+.grade-stats-table td {
+  text-align: left;
+  padding: 6px 8px;
+  border-bottom: 1px solid #e2e8f0;
+  font-size: 13px;
+}
+.grade-stats-table th { background: #f7fafc; font-weight: 600; }
+
+.stat-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 5px 0;
+  border-bottom: 1px solid #eee;
+}
+.stat-item:last-child { border-bottom: none; }
+.stat-value { font-weight: 600; }
+.percentage { color: #4299e1; font-weight: 600; }
+
+.print-stats-btn {
+  background: #28a745;
+  color: white;
+  border: none;
+  padding: 8px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  margin-top: 1rem;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+.print-stats-btn:hover { background: #218838; }
+
+/* ── Print area (hidden on screen) ──────────────── */
+#print-area { display: none; }
+
+/* ── Responsive ──────────────────────────────────── */
+@media (max-width: 768px) {
+  .ug-page-wrapper { padding: 1rem; }
+  .action-buttons { position: static; }
+}

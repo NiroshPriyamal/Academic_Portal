@@ -5,3 +5,4 @@
 tags
 academic_portal/docs/current
 node_modules/
+__pycache__/

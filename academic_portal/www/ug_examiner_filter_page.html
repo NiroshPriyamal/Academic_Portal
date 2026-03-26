@@ -1,0 +1,75 @@
+{% extends "templates/web.html" %}
+
+{% block title %}UG Examiner Portal – Select Period{% endblock %}
+
+{% block head_include %}
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/assets/academic_portal/css/ug_examiner_filter_page.css" />
+{% endblock %}
+
+{% block page_content %}
+<div class="filter-wrapper">
+  <div class="filter-card">
+
+    <div class="filter-eyebrow">UG Examiner Portal</div>
+    <div class="filter-title">Select Academic Period</div>
+    <div class="filter-subtitle">
+      Select a year, then a program, then one or more terms to view your assigned courses.
+    </div>
+    <div class="divider"></div>
+
+    <!-- Step indicator -->
+    <div class="step-row">
+      <div class="step-badge"          id="step1-badge">1</div>
+      <div class="step-line"           id="step1-line"></div>
+      <div class="step-badge inactive" id="step2-badge">2</div>
+      <div class="step-line"           id="step2-line"></div>
+      <div class="step-badge inactive" id="step3-badge">3</div>
+    </div>
+
+    <!-- Step 1: Academic Year -->
+    <div class="field-group">
+      <div class="field-label">
+        <span class="dot"></span> Academic Year
+      </div>
+      <select id="academic-year" onchange="onYearChange()">
+        <option value="">— Loading years… —</option>
+      </select>
+    </div>
+
+    <!-- Step 2: Program -->
+    <div class="field-group">
+      <div class="field-label">
+        <span class="dot" style="background:#e67e22;"></span> Program
+      </div>
+      <select id="program" disabled onchange="onProgramChange()">
+        <option value="">— Select a year first —</option>
+      </select>
+    </div>
+
+    <!-- Step 3: Academic Term chips (multi-select) -->
+    <div class="field-group">
+      <div class="field-label">
+        <span class="dot" style="background:#9b59b6;"></span>
+        Academic Term
+        <span class="optional-tag">Select any</span>
+      </div>
+      <div class="chips-hint">Click to select one or more terms</div>
+      <div class="term-chips" id="term-chips">
+        <span class="chips-loading">Select a program first…</span>
+      </div>
+      <div class="selected-summary" id="selected-summary"></div>
+    </div>
+
+    <button class="go-btn" id="go-btn" onclick="goToDashboard()" disabled>
+      View Dashboard <span class="arrow">→</span>
+    </button>
+    <div class="filter-msg" id="filter-msg"></div>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script src="/assets/academic_portal/js/ug_examiner_filter_page.js"></script>
+{% endblock %}

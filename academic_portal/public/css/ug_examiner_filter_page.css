@@ -1,0 +1,337 @@
+/* ug_examiner_filter_page.css */
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  font-family: 'Poppins', sans-serif;
+  color: #2c3e50;
+  min-height: 100vh;
+}
+
+/* ── Wrapper & card ─────────────────────────── */
+.filter-wrapper {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 40px 16px 60px;
+}
+
+.filter-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 40px 44px;
+  width: 580px;
+  max-width: 100%;
+  box-shadow: 0px 6px 20px rgba(0, 0, 0, 0.06);
+  opacity: 0;
+  animation: fadeUp 0.6s forwards;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Header ─────────────────────────────────── */
+.filter-eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #3498db;
+  margin-bottom: 8px;
+}
+
+.filter-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #34495e;
+  display: inline-block;
+}
+
+.filter-title::after {
+  content: "";
+  display: block;
+  width: 60px;
+  height: 3px;
+  background: linear-gradient(90deg, #3498db, #9b59b6);
+  margin: 8px 0 0;
+  border-radius: 2px;
+}
+
+.filter-subtitle {
+  font-size: 13.5px;
+  color: #888;
+  margin-top: 14px;
+  margin-bottom: 32px;
+  line-height: 1.55;
+}
+
+.divider {
+  height: 1px;
+  background: #eef0f4;
+  margin-bottom: 28px;
+}
+
+/* ── Step indicator ──────────────────────────── */
+.step-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 24px;
+}
+
+.step-badge {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3498db, #9b59b6);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.step-badge.inactive {
+  background: #e0e6ed;
+  color: #aab0b8;
+}
+
+.step-line {
+  flex: 1;
+  height: 2px;
+  background: #e0e6ed;
+  border-radius: 2px;
+}
+
+.step-line.active {
+  background: linear-gradient(90deg, #3498db, #9b59b6);
+}
+
+/* ── Field group ─────────────────────────────── */
+.field-group { margin-bottom: 22px; }
+
+.field-label {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #7f8c8d;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.field-label .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #3498db;
+  flex-shrink: 0;
+}
+
+/* ── Select ──────────────────────────────────── */
+select {
+  width: 100%;
+  background: #ffffff;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23a0aab4' stroke-width='2.2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 13px center;
+  border: 1px solid #e6e6e6;
+  border-radius: 10px;
+  color: #2c3e50;
+  font-family: 'Poppins', sans-serif;
+  font-size: 13.5px;
+  font-weight: 500;
+  padding: 11px 38px 11px 14px;
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  transition: border-color 0.18s, box-shadow 0.18s;
+  box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+select:hover:not(:disabled) { border-color: #b0c4d8; }
+
+select:focus {
+  border-color: #3498db;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.12);
+}
+
+select:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  background-color: #f9fafb;
+}
+
+/* ── Term chips ──────────────────────────────── */
+.chips-hint {
+  font-size: 11.5px;
+  color: #aab0b8;
+  margin-bottom: 10px;
+  font-style: italic;
+}
+
+.term-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  min-height: 42px;
+  padding: 4px 0;
+}
+
+.term-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 16px;
+  border-radius: 9999px;
+  border: 1.5px solid #e0e6ed;
+  background: #f7f9fc;
+  color: #5a6a7a;
+  font-family: 'Poppins', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  user-select: none;
+}
+
+.term-chip:hover {
+  border-color: #3498db;
+  color: #2980b9;
+  background: #eaf4fd;
+}
+
+.term-chip.selected {
+  border-color: #3498db;
+  background: linear-gradient(135deg, #eaf4fd, #f0eafb);
+  color: #2c3e50;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(52, 152, 219, 0.15);
+}
+
+.term-chip.selected::before {
+  content: "✓";
+  font-size: 11px;
+  color: #3498db;
+  font-weight: 700;
+}
+
+.chips-empty {
+  font-size: 13px;
+  color: #bbb;
+  padding: 6px 0;
+  font-style: italic;
+}
+
+.chips-loading {
+  font-size: 13px;
+  color: #aab0b8;
+  padding: 6px 0;
+}
+
+.selected-summary {
+  margin-top: 8px;
+  font-size: 12px;
+  color: #3498db;
+  font-weight: 500;
+  min-height: 16px;
+}
+
+/* ── Optional tag ────────────────────────────── */
+.optional-tag {
+  font-size: 10px;
+  font-weight: 600;
+  color: #aab0b8;
+  background: #f0f2f5;
+  border-radius: 5px;
+  padding: 1px 7px;
+  margin-left: 5px;
+  vertical-align: middle;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* ── Go button ───────────────────────────────── */
+.go-btn {
+  width: 100%;
+  margin-top: 28px;
+  padding: 13px 24px;
+  background: linear-gradient(135deg, #2980b9, #3498db);
+  border: none;
+  border-radius: 10px;
+  color: #fff;
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0px 4px 14px rgba(52, 152, 219, 0.3);
+}
+
+.go-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), transparent);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.go-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(52, 152, 219, 0.38);
+}
+
+.go-btn:hover:not(:disabled)::before { opacity: 1; }
+.go-btn:active:not(:disabled) { transform: translateY(0); }
+
+.go-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.go-btn .arrow {
+  display: inline-block;
+  margin-left: 7px;
+  transition: transform 0.2s;
+}
+
+.go-btn:hover:not(:disabled) .arrow { transform: translateX(4px); }
+
+/* ── Error message ───────────────────────────── */
+.filter-msg {
+  font-size: 12.5px;
+  color: #e74c3c;
+  margin-top: 10px;
+  text-align: center;
+  min-height: 17px;
+}
+
+/* ── Loading spinner ─────────────────────────── */
+.loading-spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid #ccc;
+  border-top-color: #3498db;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
