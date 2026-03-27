@@ -1,15 +1,47 @@
 /* ug_student_exam_result_sheet.css */
-/* Matches the layout of the original master_student_exam_result_sheet exactly */
+/* Palette: same family — but warmer/lighter for long data-entry sessions      */
+/* Background: very soft warm grey-white · Table: crisp white · Accents: teal  */
+
+:root {
+  --accent:        #3a7bd5;
+  --accent-dark:   #2660b0;
+  --accent-light:  #ddeeff;
+  --accent2:       #6c4fd6;
+  --bg:            #eceef2;          /* slightly darker grey bg     */
+  --card-bg:       #ffffff;
+  --text:          #1e2a38;          /* darker for better contrast  */
+  --text-soft:     #4a5a6a;
+  --text-muted:    #7f8e9e;
+  --border:        #c8d0dc;          /* more visible borders        */
+  --border-table:  #c0cad8;          /* stronger table grid lines   */
+  --thead-bg:      #d4e6f7;          /* brighter thead              */
+  --thead-first:   #c2dff5;
+  --thead-second:  #ddd5f5;
+  --row-alt:       #f3f6fb;
+  --editable-bg:   #fffbea;          /* warm yellow — clearly editable */
+  --editable-focus:#fff3c0;
+  --locked-bg:     #edeef2;
+  --shadow-card:   0 3px 18px rgba(40,60,100,0.12);
+  --radius:        14px;
+  --radius-sm:     8px;
+
+  /* Excel highlight — much brighter, high contrast                 */
+  --xl-row:        #c8e6ff;          /* strong blue row tint        */
+  --xl-col:        #daeeff;          /* slightly lighter col tint   */
+  --xl-cell:       #90c8f8;          /* vivid intersection          */
+  --xl-head:       #6db0f0;          /* bright header highlight     */
+  --xl-border:     #1565c0;          /* deep blue cell border       */
+}
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
-/* ── Neutralise Frappe container constraints ─────── */
+/* ── Neutralise Frappe container ─────────────────── */
 body {
-  font-family: 'Inter', sans-serif;
-  background: #f0f4f8 !important;
+  font-family: 'Inter', 'Poppins', sans-serif;
+  background: var(--bg) !important;
   padding: 0 !important;
   margin: 0 !important;
-  color: #333;
+  color: var(--text);
 }
 
 .page-content-wrapper,
@@ -24,8 +56,8 @@ body {
 .ug-page-wrapper {
   width: 100%;
   min-height: 100vh;
-  background: #f0f4f8;
-  padding: 20px;
+  background: var(--bg);
+  padding: 0 20px 40px;
   box-sizing: border-box;
 }
 
@@ -33,46 +65,51 @@ body {
 .action-buttons {
   position: sticky;
   top: 0;
-  background: #f0f4f8;
+  background: var(--bg);
   z-index: 999;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid var(--border);
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
-  padding: 10px 0 12px;
-  margin-bottom: 16px;
+  gap: 8px;
+  padding: 12px 0 13px;
+  margin-bottom: 20px;
 }
 
 .save-btn {
-  padding: 10px 20px;
+  padding: 9px 18px;
   border: none;
-  border-radius: 8px;
-  color: white;
+  border-radius: var(--radius-sm);
+  color: #fff;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 13.5px;
   font-weight: 600;
-  transition: all 0.25s ease;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  letter-spacing: 0.01em;
 }
 
 .save-btn:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.22);
+  box-shadow: 0 5px 16px rgba(0,0,0,0.18);
+  filter: brightness(1.08);
 }
 
+.save-btn:active:not(:disabled) { transform: translateY(0); }
+
 .save-btn:disabled {
-  opacity: 0.45;
+  opacity: 0.42;
   cursor: not-allowed;
+  box-shadow: none;
 }
 
 /* ── Page loader / error ─────────────────────────── */
 #page-loader {
   text-align: center;
   padding: 80px 20px;
-  color: #888;
+  color: var(--text-muted);
   font-size: 15px;
 }
 
@@ -80,7 +117,7 @@ body {
   display: none;
   text-align: center;
   padding: 60px 20px;
-  color: #e74c3c;
+  color: #e05252;
   font-size: 15px;
 }
 
@@ -88,8 +125,8 @@ body {
   display: inline-block;
   width: 20px;
   height: 20px;
-  border: 3px solid #ccc;
-  border-top-color: #3498db;
+  border: 3px solid #d0d8e4;
+  border-top-color: var(--accent);
   border-radius: 50%;
   animation: spin 0.6s linear infinite;
   margin-right: 8px;
@@ -100,42 +137,46 @@ body {
 
 /* ── Header info card ────────────────────────────── */
 .header-info {
-  background: #ffffff;
-  padding: 2rem;
-  border-radius: 16px;
-  margin-bottom: 2rem;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
-  border-left: 6px solid #74b49b;
+  background: var(--card-bg);
+  padding: 2rem 2.2rem;
+  border-radius: var(--radius);
+  margin-bottom: 22px;
+  box-shadow: var(--shadow-card);
+  border-left: 5px solid #5aac8a;
+  border-top: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
   position: relative;
 }
 
 .header-info::before {
   content: '🌿';
   position: absolute;
-  top: 15px;
-  left: 15px;
-  font-size: 24px;
+  top: 14px;
+  left: 14px;
+  font-size: 22px;
 }
 
 .header-info h3 {
   text-align: center;
-  margin: 0 0 0.4rem;
-  font-size: 1.6rem;
-  color: #0056b3;
+  margin: 0 0 4px;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #2460a7;
 }
 
 .header-info > p {
   text-align: center;
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   font-weight: 600;
-  color: #333;
+  color: var(--text-soft);
 }
 
 .header-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 2rem;
-  margin-top: 1.5rem;
+  gap: 1.5rem;
+  margin-top: 1.4rem;
 }
 
 @media (max-width: 768px) {
@@ -143,104 +184,208 @@ body {
 }
 
 .header-section {
-  padding: 1rem;
-  border-right: 1px solid #eee;
+  padding: 0.9rem 1rem;
+  border-right: 1px solid #eaecf2;
 }
 
 .header-section:last-child { border-right: none; }
 
 .header-section h4 {
-  font-size: 1rem;
-  margin-bottom: 0.6rem;
-  color: #444;
-  border-bottom: 2px solid #f0f0f0;
-  padding-bottom: 0.3rem;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  margin-bottom: 8px;
+  border-bottom: 1px solid #eaecf2;
+  padding-bottom: 5px;
 }
 
 .header-section div {
-  font-size: 0.9rem;
-  color: #555;
-  margin-bottom: 0.35rem;
+  font-size: 13px;
+  color: var(--text-soft);
+  margin-bottom: 4px;
+  line-height: 1.5;
+}
+
+.header-section div strong {
+  color: var(--text);
+  font-weight: 600;
 }
 
 /* ── Table wrapper ───────────────────────────────── */
 .table-wrap {
   overflow-x: auto;
-  border-radius: 10px;
-  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
-  background: #fff;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-card);
+  border: 1px solid var(--border-table);
 }
 
 table#marks-table {
   width: 100%;
   border-collapse: collapse;
-  background: #fff;
+  background: var(--card-bg);
   font-size: 13px;
   min-width: 900px;
 }
 
-#marks-table thead { background: #d7f4ec; }
-
-#marks-table th,
-#marks-table td {
-  border: 1px solid #e0e0e0;
-  padding: 9px 8px;
-  text-align: center;
-  vertical-align: middle;
+/* ── Header rows ─────────────────────────────────── */
+#marks-table thead tr:first-child th {
+  background: var(--thead-bg);
+  color: var(--text);
+  font-weight: 700;
+  font-size: 12.5px;
+  padding: 11px 9px;
+  border: 1px solid var(--border-table);
 }
 
-#marks-table th { font-weight: 600; }
+#marks-table thead tr:last-child th {
+  background: #e8f2fc;
+  color: var(--text-soft);
+  font-weight: 600;
+  font-size: 12px;
+  padding: 8px 9px;
+  border: 1px solid var(--border-table);
+}
 
+/* First examiner header group */
+#marks-table thead th[style*="c8f0e2"],
+#marks-table thead th[style*="d7f4ec"] {
+  background: #ddf0e8 !important;
+  color: #1a6644 !important;
+}
+
+/* Second examiner header group */
+#marks-table thead th[style*="e8d5f5"],
+#marks-table thead th[style*="ede0f7"] {
+  background: #ede5f8 !important;
+  color: #4a2a82 !important;
+}
+
+/* ── Body cells ──────────────────────────────────── */
+#marks-table td {
+  border: 1px solid var(--border-table);
+  padding: 9px 9px;
+  text-align: center;
+  vertical-align: middle;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--text);
+  transition: background 0.10s;
+}
+
+/* Thicker horizontal rule between rows for easier scanning */
+#marks-table tbody tr td {
+  border-bottom: 1px solid #b8c6d6;
+}
+
+/* Row stripe — alternating rows more visible */
+#marks-table tbody tr:nth-child(even) td {
+  background: #eef3fa;
+}
+
+/* Row hover (before click) — gentle preview */
+#marks-table tbody tr:hover td:not(.xl-row):not(.xl-col):not(.xl-cell) {
+  background: #e4eef8;
+}
+
+/* First column (row number) */
 #marks-table td:first-child,
 #marks-table th:first-child {
-  background: #f8f9fa;
-  color: #444;
-  font-weight: bold;
+  background: #f2f5fa !important;
+  color: var(--text-soft);
+  font-weight: 600;
+  font-size: 12px;
 }
 
 /* ── Editable cells ──────────────────────────────── */
 td[contenteditable="true"] {
-  background-color: #fffde7;
+  background: var(--editable-bg) !important;
   cursor: text;
   outline: none;
-  transition: background-color 0.2s, border 0.2s;
+  transition: background 0.15s, box-shadow 0.15s;
 }
 
 td[contenteditable="true"]:focus {
-  background-color: #ffffe0;
-  border: 1px solid #ffc107;
+  background: var(--editable-focus) !important;
+  box-shadow: inset 0 0 0 2px #e6b800, 0 0 6px rgba(230,184,0,0.25);
+  z-index: 1;
+  position: relative;
 }
 
 /* ── Locked cells ────────────────────────────────── */
 .locked-cell {
-  background-color: #f1f1f1 !important;
+  background: var(--locked-bg) !important;
   cursor: not-allowed !important;
-  color: #999;
+  color: var(--text-muted) !important;
 }
 
 /* ── Computed columns ────────────────────────────── */
-.final_grade { font-weight: bold; color: #00695c; }
-.auto_status { font-weight: bold; color: #c62828; }
+.final_grade {
+  font-weight: 700;
+  color: #1a6644;
+}
 
 /* ── Attendance dropdown ─────────────────────────── */
 select.exam_day_attend {
-  padding: 4px 6px;
+  padding: 5px 8px;
   border-radius: 6px;
-  border: 1px solid #d0d7de;
-  font-size: 13px;
-  background-color: #fffde7;
+  border: 1.5px solid var(--border);
+  font-size: 12.5px;
+  background: var(--editable-bg);
+  color: var(--text);
+  cursor: pointer;
+  transition: border-color 0.15s;
 }
 
 select.exam_day_attend:focus {
-  border-color: #007bff;
+  border-color: var(--accent);
   outline: none;
-  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
+  box-shadow: 0 0 0 2px rgba(79,134,198,0.18);
 }
 
-/* ── Row hover highlight ─────────────────────────── */
-.highlighted td { background-color: #cce5ff !important; }
+/* ── Excel-like row + column highlight ──────────── */
 
-/* ── Statistics Modal ────────────────────────────── */
+/* Row highlight */
+td.xl-row {
+  background: var(--xl-row) !important;
+}
+
+/* Column highlight */
+td.xl-col {
+  background: var(--xl-col) !important;
+}
+
+/* Column header highlight */
+th.xl-col-head {
+  background: var(--xl-head) !important;
+  color: #1a4e80 !important;
+}
+
+/* Selected cell — intersection */
+td.xl-cell {
+  background: var(--xl-cell) !important;
+  outline: 2px solid var(--xl-border) !important;
+  outline-offset: -2px;
+  position: relative;
+  z-index: 3;
+}
+
+td.xl-cell[contenteditable="true"] {
+  background: var(--xl-cell) !important;
+}
+
+/* Locked cells in highlight — slightly darker than editable highlight */
+td.xl-row.locked-cell,
+td.xl-col.locked-cell {
+  background: #b8d8f0 !important;
+}
+
+td.xl-cell.locked-cell {
+  background: #85bef5 !important;
+}
+
+/* ── Statistics Modal ─────────────────────────────── */
 .stats-modal {
   display: none;
   position: fixed;
@@ -248,100 +393,128 @@ select.exam_day_attend:focus {
   left: 0; top: 0;
   width: 100%; height: 100%;
   overflow: auto;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(30,40,60,0.45);
+  backdrop-filter: blur(2px);
 }
 
 .stats-content {
-  background: #fefefe;
+  background: var(--card-bg);
   margin: 2% auto;
   padding: 2rem;
-  border-radius: 16px;
+  border-radius: 18px;
   width: 90%;
   max-width: 1200px;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 16px 48px rgba(30,40,80,0.18);
 }
 
 .stats-content .close {
   float: right;
-  font-size: 28px;
+  font-size: 26px;
   font-weight: bold;
   cursor: pointer;
-  color: #aaa;
+  color: var(--text-muted);
   line-height: 1;
+  transition: color 0.15s;
 }
 
-.stats-content .close:hover { color: #000; }
+.stats-content .close:hover { color: var(--text); }
 
 .stats-header {
   text-align: center;
-  margin-bottom: 2rem;
-  border-bottom: 2px solid #e2e8f0;
+  margin-bottom: 1.8rem;
+  border-bottom: 1px solid var(--border);
   padding-bottom: 1rem;
 }
 
-.stats-header h2 { color: #2d3748; font-size: 1.8rem; }
+.stats-header h2 {
+  color: var(--text);
+  font-size: 1.6rem;
+  font-weight: 700;
+}
 
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 1.5rem;
-  margin-bottom: 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.4rem;
+  margin-bottom: 1.6rem;
 }
 
 .stats-card {
-  background: white;
-  padding: 1.5rem;
+  background: #f8fafd;
+  padding: 1.4rem;
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  border-left: 4px solid #4299e1;
+  box-shadow: 0 2px 10px rgba(60,80,120,0.07);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--accent);
 }
 
-.stats-card h3 { margin: 0 0 1rem; color: #2d3748; font-size: 1.15rem; }
+.stats-card h3 {
+  margin: 0 0 1rem;
+  color: var(--text);
+  font-size: 1.05rem;
+  font-weight: 700;
+}
 
-.chart-card { grid-column: 1 / -1; min-height: 380px; }
-.chart-container { position: relative; height: 320px; }
+.chart-card { grid-column: 1 / -1; min-height: 360px; }
+.chart-container { position: relative; height: 310px; }
 
 .grade-stats-table { width: 100%; border-collapse: collapse; margin-top: 0.5rem; }
+
 .grade-stats-table th,
 .grade-stats-table td {
   text-align: left;
-  padding: 6px 8px;
-  border-bottom: 1px solid #e2e8f0;
+  padding: 7px 9px;
+  border-bottom: 1px solid var(--border);
   font-size: 13px;
 }
-.grade-stats-table th { background: #f7fafc; font-weight: 600; }
+
+.grade-stats-table th {
+  background: var(--accent-light);
+  font-weight: 700;
+  color: var(--accent-dark);
+  font-size: 12px;
+}
 
 .stat-item {
   display: flex;
   justify-content: space-between;
-  padding: 5px 0;
-  border-bottom: 1px solid #eee;
+  padding: 6px 0;
+  border-bottom: 1px solid #eef0f5;
+  font-size: 13px;
 }
+
 .stat-item:last-child { border-bottom: none; }
-.stat-value { font-weight: 600; }
-.percentage { color: #4299e1; font-weight: 600; }
+
+.stat-value { font-weight: 700; color: var(--text); }
+.percentage { color: var(--accent); font-weight: 700; }
 
 .print-stats-btn {
-  background: #28a745;
-  color: white;
+  background: #28a87a;
+  color: #fff;
   border: none;
-  padding: 8px 18px;
-  border-radius: 8px;
+  padding: 8px 20px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
-  font-size: 14px;
+  font-size: 13.5px;
   margin-top: 1rem;
   font-weight: 600;
-  transition: background 0.2s;
+  transition: filter 0.2s, transform 0.15s;
+  box-shadow: 0 2px 8px rgba(40,168,122,0.25);
 }
-.print-stats-btn:hover { background: #218838; }
+
+.print-stats-btn:hover {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+}
 
 /* ── Print area (hidden on screen) ──────────────── */
 #print-area { display: none; }
 
 /* ── Responsive ──────────────────────────────────── */
 @media (max-width: 768px) {
-  .ug-page-wrapper { padding: 1rem; }
-  .action-buttons { position: static; }
+  .ug-page-wrapper { padding: 0 12px 32px; }
+  .action-buttons  { position: static; }
+  .header-grid     { grid-template-columns: 1fr; }
 }

@@ -285,7 +285,8 @@ def get_exam_result_sheet(course, academic_year, program, academic_term):
             "academic_year", "academic_term",
             "continues_assessment", "final_paper",
             "examination_year", "examination_date",
-            "rubric_description"
+            "rubric_description",
+            "enhancement_course", "enhancement_course_marks_range"
         ],
         limit=1
     )

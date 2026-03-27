@@ -30,6 +30,14 @@ function getGradeInfo(marks) {
   return { grade: "E", gpv: 0.00 };
 }
 
+/* For enhancement courses: CM if marks >= threshold, NC otherwise */
+function getEnhancementGrade(marks, threshold) {
+  if (marks === null || marks === undefined || marks === "") return { grade: "", gpv: 0 };
+  return parseFloat(marks) >= parseFloat(threshold)
+    ? { grade: "CM", gpv: 0 }
+    : { grade: "NC", gpv: 0 };
+}
+
 /* ══════════════════════════════════════════════════════════════
    STATE
    ══════════════════════════════════════════════════════════════ */
@@ -122,10 +130,14 @@ function renderHeader(data) {
       '</div>' +
       '<div class="header-section">' +
         '<h4>Course</h4>' +
-        '<div><strong>Course Code:</strong> ' + esc(ed.course) + '</div>' +
-        '<div><strong>Course Name:</strong> ' + esc(ed.course_name || "") + '</div>' +
-        '<div><strong>Assignment %:</strong> ' + esc(ed.continues_assessment || "") + '%</div>' +
-        '<div><strong>Paper %:</strong> ' + esc(ed.final_paper || "") + '%</div>' +
+        '<div><strong>Course Code:</strong> '   + esc(ed.course)                      + '</div>' +
+        '<div><strong>Course Name:</strong> '   + esc(ed.course_name || "")           + '</div>' +
+        (ed.enhancement_course
+          ? '<div><strong>Enhancement Course:</strong> ✅</div>' +
+            '<div><strong>Pass Mark:</strong> ' + esc(ed.enhancement_course_marks_range || "") + '</div>'
+          : '<div><strong>Assignment %:</strong> ' + esc(ed.continues_assessment || "") + '%</div>' +
+            '<div><strong>Paper %:</strong> '      + esc(ed.final_paper || "")          + '%</div>'
+        ) +
       '</div>' +
       '<div class="header-section">' +
         '<h4>Examination Details</h4>' +
@@ -210,9 +222,13 @@ function renderTable(data) {
       makeComputedTd("final_grade",
              isAbsent ? ab : esc(row.final_grade || "")) +
 
-      // Examiner comment
+      // Examiner comment — show the field that matches the logged-in role
+      // isFirst  → display first_examiner_comment
+      // isSecond → display second_examiner_comment
       makeTd("examiner_comment", canEditComment,
-             esc(row.first_examiner_comment || row.second_examiner_comment || ""));
+             esc(isFirst
+               ? (row.first_examiner_comment  || "")
+               : (row.second_examiner_comment || "")));
 
     tbody.appendChild(tr);
 
@@ -230,6 +246,13 @@ function renderTable(data) {
       handleAttendanceChange(tr);
       calcRow(tr);
     });
+  });
+
+  // Recalculate all rows on load so grade reflects current data
+  // (handles case where DB grade is stale or empty)
+  document.querySelectorAll("#marks-table tbody tr").forEach(function (tr) {
+    var attend = tr.querySelector(".exam_day_attend").value;
+    if (attend !== "Ab") calcRow(tr);
   });
 }
 
@@ -309,7 +332,12 @@ function calcRow(tr) {
     autoStatus = "****";
   }
 
-  const gradeInfo = getGradeInfo(finalMarks);
+  // Use enhancement grading if this is an enhancement course
+  var isEnhancement = pageData && pageData.eval_doc && pageData.eval_doc.enhancement_course;
+  var enhThreshold  = pageData && pageData.eval_doc && pageData.eval_doc.enhancement_course_marks_range;
+  var gradeInfo = isEnhancement
+    ? getEnhancementGrade(finalMarks, enhThreshold)
+    : getGradeInfo(finalMarks);
 
   tr.querySelector(".total_marks").innerText = total !== null ? String(total) : "";
   tr.querySelector(".final_marks").innerText = finalMarks !== null ? String(finalMarks) : "";
@@ -430,20 +458,20 @@ function allowNumericKeys(e, cell) {
    ══════════════════════════════════════════════════════════════ */
 
 function setupTableInteractions() {
-  const table = document.getElementById("marks-table");
+  var table = document.getElementById("marks-table");
 
-  // Enter key → move to next row, same column
+  // ── Enter key: move to next row same column ──────────────────────────────
   table.querySelectorAll("td[contenteditable='true']").forEach(function (cell) {
     cell.addEventListener("keydown", function (e) {
       if (e.key === "Enter") {
         e.preventDefault();
-        const tr  = cell.parentElement;
-        const idx = Array.from(tr.children).indexOf(cell);
-        const nextTr = tr.nextElementSibling;
+        var tr      = cell.parentElement;
+        var idx     = Array.from(tr.children).indexOf(cell);
+        var nextTr  = tr.nextElementSibling;
         if (nextTr) {
-          const nextCell = nextTr.children[idx];
+          var nextCell = nextTr.children[idx];
           if (nextCell) {
-            setTimeout(() => {
+            setTimeout(function () {
               nextCell.focus();
               nextTr.scrollIntoView({ behavior: "smooth", block: "center" });
             }, 10);
@@ -453,16 +481,68 @@ function setupTableInteractions() {
     });
   });
 
-  // Hover highlight
-  table.querySelectorAll("td").forEach(function (cell) {
+  // ── Excel-like row + column highlight on click / focus ───────────────────
+  // State: currently selected cell
+  var selectedCell = null;
+
+  function clearHighlights() {
+    table.querySelectorAll("td.xl-row, td.xl-col, td.xl-cell").forEach(function (el) {
+      el.classList.remove("xl-row", "xl-col", "xl-cell");
+    });
+    table.querySelectorAll("th.xl-col-head").forEach(function (el) {
+      el.classList.remove("xl-col-head");
+    });
+  }
+
+  function applyHighlight(cell) {
+    clearHighlights();
+    selectedCell = cell;
+
+    var tr       = cell.parentElement;
+    var colIndex = Array.from(tr.children).indexOf(cell);
+
+    // Highlight every td in the same row (xl-row)
+    Array.from(tr.children).forEach(function (td) {
+      td.classList.add("xl-row");
+    });
+
+    // Highlight every td in the same column (xl-col) across all body rows
+    table.querySelectorAll("tbody tr").forEach(function (row) {
+      var td = row.children[colIndex];
+      if (td) td.classList.add("xl-col");
+    });
+
+    // Highlight the selected column header (xl-col-head)
+    // thead has two rows; highlight matching th in both
+    table.querySelectorAll("thead tr").forEach(function (hrow) {
+      var th = hrow.children[colIndex];
+      if (th) th.classList.add("xl-col-head");
+    });
+
+    // The active cell itself gets a distinct intersection style (xl-cell)
+    cell.classList.add("xl-cell");
+  }
+
+  // Click: select cell
+  table.querySelectorAll("tbody td").forEach(function (cell) {
     cell.style.userSelect = "text";
-    cell.addEventListener("mouseenter", function () {
-      table.querySelectorAll("tr").forEach(r => r.classList.remove("highlighted"));
-      cell.parentElement.classList.add("highlighted");
+
+    cell.addEventListener("mousedown", function () {
+      applyHighlight(cell);
     });
-    cell.addEventListener("mouseleave", function () {
-      cell.parentElement.classList.remove("highlighted");
+
+    // Keep highlight when cell is focused via keyboard Tab
+    cell.addEventListener("focus", function () {
+      applyHighlight(cell);
     });
+  });
+
+  // Click outside table: clear highlights
+  document.addEventListener("mousedown", function (e) {
+    if (!table.contains(e.target)) {
+      clearHighlights();
+      selectedCell = null;
+    }
   });
 }
 
@@ -477,18 +557,20 @@ function collectRows() {
   var rows = [];
 
   document.querySelectorAll("#marks-table tbody tr").forEach(function (tr) {
-    var attend = tr.querySelector(".exam_day_attend").value;
+    var attend  = tr.querySelector(".exam_day_attend").value;
+    var comment = tr.querySelector(".examiner_comment").innerText.trim();
     var row = { name: tr.dataset.id, data: {} };
 
     // Attendance + prev assignment (always)
-    row.data.exam_day_attend            = attend;
-    row.data.previous_assignment_marks  = tr.querySelector(".previous_assignment_marks").innerText.trim();
+    row.data.exam_day_attend           = attend;
+    row.data.previous_assignment_marks = tr.querySelector(".previous_assignment_marks").innerText.trim();
 
     // First examiner fields
     if (isFirst) {
       row.data.assignment_marks       = tr.querySelector(".assignment_marks").innerText.trim();
       row.data.paper_marks            = tr.querySelector(".paper_marks").innerText.trim();
-      row.data.first_examiner_comment = tr.querySelector(".examiner_comment").innerText.trim();
+      // "Setter(s) / First Examiner" comment → first_examiner_comment
+      row.data.first_examiner_comment = comment;
     }
 
     // Second examiner fields
@@ -496,14 +578,14 @@ function collectRows() {
       row.data.second_assignment_marks = tr.querySelector(".second_assignment_marks").innerText.trim();
       row.data.second_paper_marks      = tr.querySelector(".second_paper_marks").innerText.trim();
       row.data.second_total_marks      = tr.querySelector(".second_total_marks").innerText.trim();
-      row.data.second_examiner_comment = tr.querySelector(".examiner_comment").innerText.trim();
+      // "Moderator / Second Examiner" comment → second_examiner_comment
+      row.data.second_examiner_comment = comment;
     }
 
     // Computed fields — ALWAYS saved regardless of role
-    row.data.total_marks           = tr.querySelector(".total_marks").innerText.trim();
-    row.data.final_marks           = tr.querySelector(".final_marks").innerText.trim();
-    row.data.final_grade           = tr.querySelector(".final_grade").innerText.trim();
-
+    row.data.total_marks = tr.querySelector(".total_marks").innerText.trim();
+    row.data.final_marks = tr.querySelector(".final_marks").innerText.trim();
+    row.data.final_grade = tr.querySelector(".final_grade").innerText.trim();
 
     rows.push(row);
   });
@@ -659,64 +741,100 @@ window.addEventListener("click", function (e) {
 });
 
 function calculateAndDisplayStats() {
-  const GRADE_ORDER = ["A+","A","A-","B+","B","B-","C+","C","C-","D+","D","E","Ab"];
-  const gradeCounts = {};
-  GRADE_ORDER.forEach(g => gradeCounts[g] = 0);
+  // Detect enhancement course mode from pageData
+  var isEnhancement = pageData && pageData.eval_doc && pageData.eval_doc.enhancement_course;
+  var enhThreshold  = pageData && pageData.eval_doc
+                      ? parseFloat(pageData.eval_doc.enhancement_course_marks_range) || 0
+                      : 0;
 
-  const marks = [];
+  // Grade order depends on course type
+  var GRADE_ORDER = isEnhancement
+    ? ["CM", "NC", "Ab"]
+    : ["A+","A","A-","B+","B","B-","C+","C","C-","D+","D","E","Ab"];
+
+  var gradeCounts = {};
+  GRADE_ORDER.forEach(function(g) { gradeCounts[g] = 0; });
+
+  var marks = [];
 
   document.querySelectorAll("#marks-table tbody tr").forEach(function (tr) {
-    const grade = tr.querySelector(".final_grade").innerText.trim();
-    const mark  = tr.querySelector(".final_marks").innerText.trim();
-    if (grade && gradeCounts.hasOwnProperty(grade)) gradeCounts[grade]++;
-    else if (grade) gradeCounts["Ab"] = (gradeCounts["Ab"] || 0) + 1;
-    if (mark && mark !== "Ab" && !isNaN(parseFloat(mark))) marks.push(parseFloat(mark));
+    var grade = tr.querySelector(".final_grade").innerText.trim();
+    var mark  = tr.querySelector(".final_marks").innerText.trim();
+
+    if (grade) {
+      if (gradeCounts.hasOwnProperty(grade)) {
+        gradeCounts[grade]++;
+      } else {
+        // Unexpected grade — bucket into Ab
+        gradeCounts["Ab"] = (gradeCounts["Ab"] || 0) + 1;
+      }
+    }
+    if (mark && mark !== "Ab" && !isNaN(parseFloat(mark))) {
+      marks.push(parseFloat(mark));
+    }
   });
 
-  const total = Object.values(gradeCounts).reduce((a, b) => a + b, 0);
+  var total = Object.values(gradeCounts).reduce(function(a, b) { return a + b; }, 0);
 
-  // Grade distribution table
-  const tbody = document.getElementById("gradeDistribution");
+  // ── Grade distribution table ───────────────────────────────────────────────
+  var tbody = document.getElementById("gradeDistribution");
   tbody.innerHTML = "";
   GRADE_ORDER.forEach(function (g) {
-    const count = gradeCounts[g] || 0;
-    const pct   = total > 0 ? ((count / total) * 100).toFixed(1) : "0.0";
-    const tr    = document.createElement("tr");
-    tr.innerHTML = "<td><strong>" + g + "</strong></td><td>" + count + "</td><td class='percentage'>" + pct + "%</td>";
+    var count = gradeCounts[g] || 0;
+    var pct   = total > 0 ? ((count / total) * 100).toFixed(1) : "0.0";
+    var tr    = document.createElement("tr");
+    tr.innerHTML = "<td><strong>" + g + "</strong></td><td>" + count + "</td>" +
+                   "<td class='percentage'>" + pct + "%</td>";
     tbody.appendChild(tr);
   });
 
-  // Statistical measures
-  const stats = calcStats(marks);
+  // ── Statistical measures ───────────────────────────────────────────────────
+  var stats = calcStats(marks);
   document.getElementById("statisticalMeasures").innerHTML =
     statItem("Average", stats.avg) + statItem("Std Deviation", stats.sd) +
     statItem("Maximum", stats.max) + statItem("Minimum", stats.min) +
     statItem("Median",  stats.median) + statItem("Mode", stats.mode);
 
-  // Pass / fail
-  const passing = ["C","C+","B-","B","B+","A-","A","A+"];
-  const failing  = ["C-","D+","D","E"];
-  let passed = 0, failed = 0, absent = 0;
-  GRADE_ORDER.forEach(function (g) {
-    const c = gradeCounts[g] || 0;
-    if (passing.includes(g)) passed += c;
-    else if (failing.includes(g)) failed += c;
-    else if (g === "Ab") absent += c;
-  });
-  document.getElementById("passFailSummary").innerHTML =
-    statItem("Passed", passed) + statItem("Failed", failed) +
-    statItem("Absent", absent) + statItem("Total Present", passed + failed);
+  // ── Pass / Fail summary ────────────────────────────────────────────────────
+  var passed = 0, failed = 0, absent = gradeCounts["Ab"] || 0;
 
-  // Chart
-  const ctx = document.getElementById("gradeChart").getContext("2d");
+  if (isEnhancement) {
+    // Enhancement: CM = competent (passed), NC = not competent (failed)
+    passed = gradeCounts["CM"] || 0;
+    failed = gradeCounts["NC"] || 0;
+    document.getElementById("passFailSummary").innerHTML =
+      statItem("Competent (CM)",     passed) +
+      statItem("Not Competent (NC)", failed) +
+      statItem("Absent",             absent) +
+      statItem("Total Present",      passed + failed) +
+      statItem("Pass Mark Threshold", enhThreshold);
+  } else {
+    var passing = ["C","C+","B-","B","B+","A-","A","A+"];
+    var failing  = ["C-","D+","D","E"];
+    GRADE_ORDER.forEach(function (g) {
+      var c = gradeCounts[g] || 0;
+      if (passing.includes(g))    passed += c;
+      else if (failing.includes(g)) failed += c;
+    });
+    document.getElementById("passFailSummary").innerHTML =
+      statItem("Passed",        passed) +
+      statItem("Failed",        failed) +
+      statItem("Absent",        absent) +
+      statItem("Total Present", passed + failed);
+  }
+
+  // ── Bar chart ──────────────────────────────────────────────────────────────
+  var ctx = document.getElementById("gradeChart").getContext("2d");
   if (gradeChartInstance) gradeChartInstance.destroy();
 
-  const colors = GRADE_ORDER.map(function (g) {
-    if (["A+","A","A-"].includes(g)) return "#22c55e";
-    if (["B+","B","B-"].includes(g)) return "#3b82f6";
-    if (["C+","C","C-"].includes(g)) return "#f59e0b";
-    if (["D+","D","E"].includes(g))  return "#ef4444";
-    return "#6b7280";
+  var colors = GRADE_ORDER.map(function (g) {
+    if (g === "CM")                       return "#22c55e"; // green  — competent
+    if (g === "NC")                       return "#ef4444"; // red    — not competent
+    if (["A+","A","A-"].includes(g))      return "#22c55e";
+    if (["B+","B","B-"].includes(g))      return "#3b82f6";
+    if (["C+","C","C-"].includes(g))      return "#f59e0b";
+    if (["D+","D","E"].includes(g))       return "#ef4444";
+    return "#6b7280"; // Ab / unknown
   });
 
   gradeChartInstance = new Chart(ctx, {
@@ -725,7 +843,7 @@ function calculateAndDisplayStats() {
       labels: GRADE_ORDER,
       datasets: [{
         label: "Students",
-        data: GRADE_ORDER.map(g => gradeCounts[g] || 0),
+        data: GRADE_ORDER.map(function(g) { return gradeCounts[g] || 0; }),
         backgroundColor: colors,
         borderRadius: 6
       }]
@@ -736,13 +854,16 @@ function calculateAndDisplayStats() {
         legend: { display: false },
         title: {
           display: true,
-          text: "Grade Distribution (Total: " + total + ")",
-          font: { size: 16, weight: "bold" }, color: "#2d3748", padding: 16
+          text: (isEnhancement ? "Enhancement Course — " : "") +
+                "Grade Distribution (Total: " + total + ")" +
+                (isEnhancement ? "  |  Pass Mark: " + enhThreshold : ""),
+          font: { size: 15, weight: "bold" }, color: "#2d3748", padding: 16
         }
       },
       scales: {
         x: { grid: { display: false }, ticks: { font: { weight: "bold" } } },
-        y: { beginAtZero: true, ticks: { stepSize: 1 }, grid: { color: "#e2e8f0", borderDash: [2,2] } }
+        y: { beginAtZero: true, ticks: { stepSize: 1 },
+             grid: { color: "#e2e8f0", borderDash: [2,2] } }
       },
       animation: { duration: 1000 }
     }
