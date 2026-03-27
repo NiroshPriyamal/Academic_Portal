@@ -209,10 +209,6 @@ function renderTable(data) {
              isAbsent ? ab : esc(row.final_marks || "")) +
       makeComputedTd("final_grade",
              isAbsent ? ab : esc(row.final_grade || "")) +
-      makeComputedTd("gpv",
-             isAbsent ? ab : esc(row.grade_point_value_gpa || "")) +
-      makeComputedTd("auto_status",
-             isAbsent ? ab : esc(row.auto_status || "")) +
 
       // Examiner comment
       makeTd("examiner_comment", canEditComment,
@@ -318,8 +314,6 @@ function calcRow(tr) {
   tr.querySelector(".total_marks").innerText = total !== null ? String(total) : "";
   tr.querySelector(".final_marks").innerText = finalMarks !== null ? String(finalMarks) : "";
   tr.querySelector(".final_grade").innerText = gradeInfo.grade || "";
-  tr.querySelector(".gpv").innerText         = gradeInfo.gpv !== undefined ? gradeInfo.gpv.toFixed(2) : "";
-  tr.querySelector(".auto_status").innerText = autoStatus;
 }
 
 function handleAttendanceChange(tr) {
@@ -327,7 +321,7 @@ function handleAttendanceChange(tr) {
   const abFields = [
     ".paper_marks", ".assignment_marks", ".previous_assignment_marks",
     ".second_assignment_marks", ".second_paper_marks", ".second_total_marks",
-    ".total_marks", ".final_marks", ".final_grade", ".gpv", ".auto_status"
+    ".total_marks", ".final_marks", ".final_grade"
   ];
 
   if (isAbsent) {
@@ -358,7 +352,7 @@ function restoreCellEditability(tr, cell, className) {
 
   const firstEditableCls  = ["assignment_marks", "paper_marks", "previous_assignment_marks"];
   const secondEditableCls = ["second_assignment_marks", "second_paper_marks", "second_total_marks"];
-  const computedCls       = ["total_marks", "final_marks", "final_grade", "gpv", "auto_status"];
+  const computedCls       = ["total_marks", "final_marks", "final_grade"];
 
   if (computedCls.includes(className)) {
     cell.setAttribute("contenteditable", "false");
@@ -509,8 +503,7 @@ function collectRows() {
     row.data.total_marks           = tr.querySelector(".total_marks").innerText.trim();
     row.data.final_marks           = tr.querySelector(".final_marks").innerText.trim();
     row.data.final_grade           = tr.querySelector(".final_grade").innerText.trim();
-    row.data.grade_point_value_gpa = tr.querySelector(".gpv").innerText.trim();
-    row.data.auto_status           = tr.querySelector(".auto_status").innerText.trim();
+
 
     rows.push(row);
   });
@@ -809,8 +802,7 @@ function showPrintView() {
       '<td>' + (tr.querySelector(".second_total_marks") ? tr.querySelector(".second_total_marks").innerText : "") + '</td>' +
       '<td>' + (tr.querySelector(".final_marks") ? tr.querySelector(".final_marks").innerText : "") + '</td>' +
       '<td>' + (tr.querySelector(".final_grade") ? tr.querySelector(".final_grade").innerText : "") + '</td>' +
-      '<td>' + (tr.querySelector(".gpv") ? tr.querySelector(".gpv").innerText : "") + '</td>' +
-      '<td>' + (tr.querySelector(".auto_status") ? tr.querySelector(".auto_status").innerText : "") + '</td>' +
+
       '</tr>';
   });
 
@@ -825,7 +817,7 @@ function showPrintView() {
     // assignment_marks, paper_marks, total_marks, 2nd assign, 2nd paper, 2nd total, final, grade, gpv, auto
     [".assignment_marks",".paper_marks",".total_marks",
      ".second_assignment_marks",".second_paper_marks",".second_total_marks",
-     ".final_marks",".final_grade",".gpv",".auto_status"].forEach(function (cls) {
+     ".final_marks",".final_grade"].forEach(function (cls) {
       const cell = tr.querySelector(cls);
       rowsHtml += '<td>' + (cell ? cell.innerText : "") + '</td>';
     });
@@ -861,7 +853,6 @@ function showPrintView() {
         <th colspan="3">First Examiner</th>
         <th colspan="3">Second Examiner</th>
         <th rowspan="2">Final</th><th rowspan="2">Grade</th>
-        <th rowspan="2">GPV</th><th rowspan="2">Status</th>
       </tr>
       <tr>
         <th>Assign</th><th>Paper</th><th>Total</th>
